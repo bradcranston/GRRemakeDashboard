@@ -5,13 +5,46 @@
     <style>
       @import "./src/style.css";
     </style>
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
+        <link href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.css" rel="stylesheet">
     <title>JSDev</title>
   </head>
   <body>
-    <h1>Alright. You're set.</h1>
-      <h2 class="tintedBlackLeft">Now build something amazing!</h2>
-      <p>JS in FM is amazing</p>
-    <button type="button">Click Me!</button>
+
+
+    <header>
+      <h2>Gasket Remake Dashboard</h2>
+      <div class="date-range">
+          <label for="start-date">Start Date:</label>
+          <input type="date" id="start-date" name="start-date">
+          <label for="end-date">End Date:</label>
+          <input type="date" id="end-date" name="end-date">
+      </div>
+  </header>
+  <div class="container">
+      <div class="column">
+        <h3>Year to Date</h3>
+          <div id="A1"></div>
+          <div id="A2"><table id="tableA2" class="display compact nowrap" style="width:100%"></table></div>
+          <div id="A3"><table id="tableA3" class="display compact nowrap" style="width:100%"></table></div>
+      </div>
+      <div class="column">
+        <h3>Last Month</h3>
+        <div id="B1"></div>
+        <div id="B2"><table id="tableB2" class="display compact nowrap" style="width:100%"></table></div>
+        <div id="B3"><table id="tableB3" class="display compact nowrap" style="width:100%"></table></div>
+      </div>
+      <div class="column">
+        <h3>Date Range</h3>
+        <div id="C1"></div>
+        <div id="C2"><table id="tableC2" class="display compact nowrap" style="width:100%"></table></div>
+        <div id="C3"><table id="tableC3" class="display compact nowrap" style="width:100%"></table></div>
+      </div>
+  </div>
+
+
+
 
     <script type="module">
       import "./src/index.js";
