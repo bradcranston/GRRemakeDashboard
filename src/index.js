@@ -50,19 +50,28 @@ startInput.addEventListener('input', handleInput);
 endInput.addEventListener('input', handleInput);
 
 function handleInput() {
+
+  const startDate = parseDate(startInput.value);
+  const endDate = parseDate(endInput.value);
+
+  startDate.setHours(startDate.getHours() + 4);
+  endDate.setHours(endDate.getHours() + 4);
+
     const divC1 = document.getElementById('C1');
-    const divC1Numbers = processGasketData(startInput.value,endInput.value,lines)
+    const divC1Numbers = processGasketData(startDate,endDate,lines)
     const divC1Text = 'Gaskets Made: ' + divC1Numbers.gasketsMadeTotal + '<br>Gaskets Remakes: ' + divC1Numbers.gasketsRemadeTotal + '<br>Remake Percentage: ' + (divC1Numbers.remakePercent).toFixed(2) + '%' + '<br>Remake Shipping Charges: ' + divC1Numbers.shipCost
     divC1.innerHTML = divC1Text;
-    console.log(startInput.value);
+    //console.log(startInput.value);
     const tableC2 = $('#tableC2').DataTable();
     tableC2.clear();
-    tableC2.rows.add(summarizeDataUser(startInput.value,endInput.value, lines, users));
+    tableC2.rows.add(summarizeDataUser(startDate,endDate, lines, users));
     tableC2.draw();
     const tableC3 = $('#tableC3').DataTable();
     tableC3.clear();
-    tableC3.rows.add(summarizeDataProfile(startInput.value,endInput.value, lines, users));
+    tableC3.rows.add(summarizeDataProfile(startDate,endDate, lines, users));
     tableC3.draw();
+//console.log(endInput.value)
+
 };
 
 
@@ -96,10 +105,13 @@ createTable("#tableA3",columns,summarizeDataProfile(firstDayOfYear, lastDayOfYea
 createTable("#tableB3",columns,summarizeDataProfile(firstDayOfPreviousMonth, lastDayOfPreviousMonth, lines, users));
 createTable("#tableC3",columns,summarizeDataProfile(startInput.value,endInput.value, lines, users));
 
-
+//console.log({'start':firstDayOfPreviousMonth,'end':lastDayOfPreviousMonth});
+//console.log({'end':lastDayOfPreviousMonth});
 //console.log(firstDayOfYear, lastDayOfYear);
-console.log(summarizeDataProfile(firstDayOfPreviousMonth, lastDayOfPreviousMonth, lines, users));
 //console.log(lines);
-
+    // Helper function to parse dates
+    function parseDate(dateStr) {
+        return new Date(dateStr);
+    }
 
 };

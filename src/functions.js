@@ -7,6 +7,10 @@ function processGasketData(startDate, endDate, lines) {
     // Convert startDate and endDate to Date objects
     const start = parseDate(startDate);
     const end = parseDate(endDate);
+    end.setHours(23, 59, 59, 999);
+
+
+    console.log({'start':start,'end':end})
 
     // Arrays to hold filtered data
     const gasketsMade = [];
