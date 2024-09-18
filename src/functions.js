@@ -9,8 +9,9 @@ function processGasketData(startDate, endDate, lines) {
     const end = parseDate(endDate);
     end.setHours(23, 59, 59, 999);
 
+    console.log(lines);
 
-    console.log({'start':start,'end':end})
+    //console.log({'start':start,'end':end})
 
     // Arrays to hold filtered data
     const gasketsMade = [];

@@ -29,7 +29,7 @@ function summarizeDataUser(start, end, lines, users) {
   const userStats = {};
 
   filteredLines.forEach((line) => {
-    const { userKeys, Qty, f_remake } = line.fieldData;
+    const { userKeys, Qty, f_remade } = line.fieldData;
 
     // Split userKeys by line break and process each key
     const userKeyList = userKeys
@@ -43,7 +43,7 @@ function summarizeDataUser(start, end, lines, users) {
       }
 
       userStats[userKey].totalQty += Qty;
-      if (f_remake === 1) {
+      if (f_remade === 1) {
         userStats[userKey].remakeQty += Qty;
       } else {
         userStats[userKey].nonRemakeQty += Qty;
@@ -114,11 +114,19 @@ function summarizeDataProfile(start, end, lines) {
     return orderDate >= startDate && orderDate <= endDate;
   });
 
+  function countRemakes(data) {
+    return data.reduce((total, item) => {
+      return total + (item.fieldData.f_remade === 1 ? 1 : 0);
+    }, 0);
+  }
+
+const countRemakesSum =  countRemakes(filteredLines);
+
   // Create a map to store quantities and totals for each Gasket_Profile
   const gasketProfileStats = {};
 
   filteredLines.forEach((line) => {
-    const { Gasket_Profile, Qty, f_remake } = line.fieldData;
+    const { Gasket_Profile, Qty, f_remade } = line.fieldData;
 
     if (!gasketProfileStats[Gasket_Profile]) {
       gasketProfileStats[Gasket_Profile] = {
@@ -129,7 +137,7 @@ function summarizeDataProfile(start, end, lines) {
     }
 
     gasketProfileStats[Gasket_Profile].totalQty += Qty;
-    if (f_remake === 1) {
+    if (f_remade === 1) {
       gasketProfileStats[Gasket_Profile].remakeQty += Qty;
     } else {
       gasketProfileStats[Gasket_Profile].nonRemakeQty += Qty;
@@ -140,7 +148,7 @@ function summarizeDataProfile(start, end, lines) {
   const result = Object.keys(gasketProfileStats).map((profile) => {
     const stats = gasketProfileStats[profile];
     const { totalQty, remakeQty, nonRemakeQty } = stats;
-    const percentage = nonRemakeQty === 0 ? 0 : remakeQty / nonRemakeQty;
+    const percentage = nonRemakeQty === 0 ? 0 : remakeQty / countRemakesSum;
     return [profile, (percentage * 100).toFixed(2) + "%", remakeQty, totalQty];
   });
 

@@ -7,12 +7,17 @@ const data = {};
 data.lines = [];
 data.users = [];
 
-window.loadLines= (json) => {
-    const array1 = data.lines;
-    const array2 = JSON.parse(json);
-    const merged = [...array1, ...array2];
-    data.lines = merged;
+window.loadLines = (json) => {
+//  console.log(json); // Check if valid JSON string
+  try {
+      const array2 = JSON.parse(json);
+      const merged = [...data.lines, ...array2];
+      data.lines = merged;
+  } catch (error) {
+      console.error("Failed to parse JSON:", error);
+  }
 };
+
 
 window.loadUsers= (json) => {
     data.users = JSON.parse(json);
@@ -23,6 +28,7 @@ window.loadDash = () => {
 const lines = data.lines;
 const users = data.users;
 
+console.log(lines);
 
 const now = new Date();
 const currentYear = now.getFullYear();
