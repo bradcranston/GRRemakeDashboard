@@ -29,7 +29,7 @@ function summarizeDataUser(start, end, lines, users) {
   const userStats = {};
 
   filteredLines.forEach((line) => {
-    const { userKeys, Qty, f_remade } = line.fieldData;
+    const { userKeys, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
 
     // Split userKeys by line break and process each key
     const userKeyList = userKeys
@@ -43,7 +43,11 @@ function summarizeDataUser(start, end, lines, users) {
       }
 
       userStats[userKey].totalQty += Qty;
-      if (f_remade === 1) {
+      
+      // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+      const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+      
+      if (isRemake) {
         userStats[userKey].remakeQty += Qty;
       } else {
         userStats[userKey].nonRemakeQty += Qty;
@@ -116,7 +120,10 @@ function summarizeDataProfile(start, end, lines) {
 
   function countRemakes(data) {
     return data.reduce((total, item) => {
-      return total + (item.fieldData.f_remade === 1 ? 1 : 0);
+      const { f_remade, f_itemGasket, OrderPrice } = item.fieldData;
+      // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+      const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+      return total + (isRemake ? 1 : 0);
     }, 0);
   }
 
@@ -126,7 +133,7 @@ const countRemakesSum =  countRemakes(filteredLines);
   const gasketProfileStats = {};
 
   filteredLines.forEach((line) => {
-    const { Gasket_Profile, Qty, f_remade } = line.fieldData;
+    const { Gasket_Profile, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
 
     if (!gasketProfileStats[Gasket_Profile]) {
       gasketProfileStats[Gasket_Profile] = {
@@ -137,7 +144,11 @@ const countRemakesSum =  countRemakes(filteredLines);
     }
 
     gasketProfileStats[Gasket_Profile].totalQty += Qty;
-    if (f_remade === 1) {
+    
+    // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+    const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+    
+    if (isRemake) {
       gasketProfileStats[Gasket_Profile].remakeQty += Qty;
     } else {
       gasketProfileStats[Gasket_Profile].nonRemakeQty += Qty;

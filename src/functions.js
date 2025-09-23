@@ -20,7 +20,10 @@ function processGasketData(startDate, endDate, lines) {
     // Filter lines into gasketsMade and gasketsRemade arrays
     for (const line of lines) {
         const orderDate = parseDate(line.fieldData.Order_Date);
-        const isRemade = line.fieldData.f_remade === 1;
+        const { f_remade, f_itemGasket, OrderPrice } = line.fieldData;
+        
+        // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+        const isRemade = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
         
         if (orderDate >= start && orderDate <= end) {
             if (isRemade) {
