@@ -28,34 +28,38 @@ function summarizeDataUser(start, end, lines, users) {
   // Create a map to store quantities and totals for each userKey
   const userStats = {};
 
+
+
   filteredLines.forEach((line) => {
-    const { userKeys, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
+    const { MPKey, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
 
-    // Split userKeys by line break and process each key
-    const userKeyList = userKeys
-      .split("\r")
-      .map((key) => key.trim())
-      .filter((key) => key);
-
-    userKeyList.forEach((userKey) => {
+    // Only use MPKey - convert to string if it's a number
+    if (MPKey !== null && MPKey !== undefined && MPKey !== '') {
+      const userKey = String(MPKey).trim();
+      
       if (!userStats[userKey]) {
-        userStats[userKey] = { totalQty: 0, remakeQty: 0, nonRemakeQty: 0 };
+        userStats[userKey] = { totalQty: 0, remakeQty: 0, nonRemakeQty: 0, totalLines: 0, remakeLines: 0 };
       }
 
       userStats[userKey].totalQty += Qty;
+      userStats[userKey].totalLines += 1;
       
-      // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
-      const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
-      
-      if (isRemake) {
+    // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+    const isRemade = f_remade === 1 || f_remade === "1";
+    const isGasketRemake = ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+    const isRemake = isRemade || isGasketRemake;      if (isRemake) {
         userStats[userKey].remakeQty += Qty;
+        userStats[userKey].remakeLines += 1;
       } else {
         userStats[userKey].nonRemakeQty += Qty;
       }
-    });
+    }
   });
 
-  // Map userKeys to user names and filter based on Account_Type
+
+
+  // Map __kp_User to user names and filter based on Account_Type
+  // MPKey from lines data will match to __kp_User from user data
   const userMap = users.reduce((map, user) => {
     const { __kp_User, Name_First, Name_Last, Account_Type } = user.fieldData;
     if (Account_Type !== "Field Operations" && Account_Type !== "Territory Manager") {
@@ -68,22 +72,17 @@ function summarizeDataUser(start, end, lines, users) {
   const result = Object.keys(userStats).map((userKey) => {
     const stats = userStats[userKey];
     const name = userMap[userKey] || "Unknown User";
-    const { totalQty, remakeQty, nonRemakeQty } = stats;
-    const percentage = nonRemakeQty === 0 ? 0 : remakeQty / nonRemakeQty;
+    const { totalQty, remakeQty } = stats;
+    const percentage = totalQty === 0 ? 0 : remakeQty / totalQty;
 
-    // Only include users that were not filtered out
-    if (userMap[userKey]) {
-      return [
-        name,
-        (percentage * 100).toFixed(2) + "%",
-        remakeQty,
-        totalQty,
-        userKey,
-        "user"
-      ];
-    }
-    return null;
-  }).filter(result => result !== null); // Remove null entries
+    return [
+      name,
+      (percentage * 100).toFixed(2) + "%",
+      remakeQty,
+      userKey,
+      "user"
+    ];
+  });
 
   // Sort the result array by the second value (percentage) in descending order
   result.sort((a, b) => b[1] - a[1]);
@@ -118,17 +117,6 @@ function summarizeDataProfile(start, end, lines) {
     return orderDate >= startDate && orderDate <= endDate;
   });
 
-  function countRemakes(data) {
-    return data.reduce((total, item) => {
-      const { f_remade, f_itemGasket, OrderPrice } = item.fieldData;
-      // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
-      const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
-      return total + (isRemake ? 1 : 0);
-    }, 0);
-  }
-
-const countRemakesSum =  countRemakes(filteredLines);
-
   // Create a map to store quantities and totals for each Gasket_Profile
   const gasketProfileStats = {};
 
@@ -140,16 +128,22 @@ const countRemakesSum =  countRemakes(filteredLines);
         totalQty: 0,
         remakeQty: 0,
         nonRemakeQty: 0,
+        totalLines: 0,
+        remakeLines: 0,
       };
     }
 
     gasketProfileStats[Gasket_Profile].totalQty += Qty;
+    gasketProfileStats[Gasket_Profile].totalLines += 1;
     
     // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
-    const isRemake = f_remade === 1 || ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+    const isRemade = f_remade === 1 || f_remade === "1";
+    const isGasketRemake = ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+    const isRemake = isRemade || isGasketRemake;
     
     if (isRemake) {
       gasketProfileStats[Gasket_Profile].remakeQty += Qty;
+      gasketProfileStats[Gasket_Profile].remakeLines += 1;
     } else {
       gasketProfileStats[Gasket_Profile].nonRemakeQty += Qty;
     }
@@ -158,9 +152,9 @@ const countRemakesSum =  countRemakes(filteredLines);
   // Prepare the result array
   const result = Object.keys(gasketProfileStats).map((profile) => {
     const stats = gasketProfileStats[profile];
-    const { totalQty, remakeQty, nonRemakeQty } = stats;
-    const percentage = nonRemakeQty === 0 ? 0 : remakeQty / countRemakesSum;
-    return [profile, (percentage * 100).toFixed(2) + "%", remakeQty, totalQty];
+    const { totalQty, remakeQty } = stats;
+    const percentage = totalQty === 0 ? 0 : remakeQty / totalQty;
+    return [profile, (percentage * 100).toFixed(2) + "%", remakeQty];
   });
 
   // Sort the result array by the second value (percentage) in descending order

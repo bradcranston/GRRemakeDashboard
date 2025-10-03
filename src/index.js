@@ -10,7 +10,14 @@ data.users = [];
 window.loadLines = (json) => {
 //  console.log(json); // Check if valid JSON string
   try {
-      const array2 = JSON.parse(json);
+      // Check if json is already an object/array or if it's a string that needs parsing
+      let array2;
+      if (typeof json === 'string') {
+          array2 = JSON.parse(json);
+      } else {
+          array2 = json; // Already parsed data
+      }
+      
       const merged = [...data.lines, ...array2];
       data.lines = merged;
   } catch (error) {
@@ -89,7 +96,7 @@ let columns = [
       title: "Percent",
     },
     {
-      title: "Remakes",
+      title: "Remake Qty",
     }];
 
 createTable("#tableA2",columns,summarizeDataUser(firstDayOfYear, lastDayOfYear, lines, users));
@@ -104,7 +111,7 @@ columns = [
       title: "Percent",
     },
     {
-      title: "Remakes",
+      title: "Remake Qty",
     }];
 
 createTable("#tableA3",columns,summarizeDataProfile(firstDayOfYear, lastDayOfYear, lines, users));
