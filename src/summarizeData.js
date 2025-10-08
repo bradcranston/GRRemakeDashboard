@@ -1,4 +1,4 @@
-function summarizeDataUser(start, end, lines, users) {
+function summarizeDataUser(start, end, lines, users, mode = 'mp') {
   // Helper function to format the date string to a Date object
   const parseDate = (dateStr) => {
     if (dateStr.includes("-")) {
@@ -31,12 +31,25 @@ function summarizeDataUser(start, end, lines, users) {
 
 
   filteredLines.forEach((line) => {
-    const { MPKey, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
+    const { MPKey, userKeys, Qty, f_remade, f_itemGasket, OrderPrice } = line.fieldData;
 
-    // Only use MPKey - convert to string if it's a number
-    if (MPKey !== null && MPKey !== undefined && MPKey !== '') {
-      const userKey = String(MPKey).trim();
-      
+    // Determine which keys to process based on mode
+    let keysToProcess = [];
+    
+    if (mode === 'mp') {
+      // MPs mode: use MPKey
+      if (MPKey !== null && MPKey !== undefined && MPKey !== '') {
+        keysToProcess = [String(MPKey).trim()];
+      }
+    } else if (mode === 'all') {
+      // All Users mode: use userKeys (return-separated list)
+      if (userKeys !== null && userKeys !== undefined && userKeys !== '') {
+        keysToProcess = String(userKeys).split('\r').map(key => key.trim()).filter(key => key !== '');
+      }
+    }
+
+    // Process each key
+    keysToProcess.forEach(userKey => {
       if (!userStats[userKey]) {
         userStats[userKey] = { totalQty: 0, remakeQty: 0, nonRemakeQty: 0, totalLines: 0, remakeLines: 0 };
       }
@@ -44,16 +57,18 @@ function summarizeDataUser(start, end, lines, users) {
       userStats[userKey].totalQty += Qty;
       userStats[userKey].totalLines += 1;
       
-    // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
-    const isRemade = f_remade === 1 || f_remade === "1";
-    const isGasketRemake = ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
-    const isRemake = isRemade || isGasketRemake;      if (isRemake) {
+      // Check if it's a remake: either f_remade === 1 OR (OrderPrice is 0/empty AND f_itemGasket === 1)
+      const isRemade = f_remade === 1 || f_remade === "1";
+      const isGasketRemake = ((OrderPrice === 0 || OrderPrice === "" || OrderPrice == null) && f_itemGasket === 1);
+      const isRemake = isRemade || isGasketRemake;
+      
+      if (isRemake) {
         userStats[userKey].remakeQty += Qty;
         userStats[userKey].remakeLines += 1;
       } else {
         userStats[userKey].nonRemakeQty += Qty;
       }
-    }
+    });
   });
 
 

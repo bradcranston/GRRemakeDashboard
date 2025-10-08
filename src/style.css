@@ -10,6 +10,18 @@ header {
 .date-range {
   margin-top: 10px;
 }
+.user-mode-toggle {
+  margin-top: 15px;
+}
+.user-mode-toggle label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+.user-mode-toggle select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 .container {
   display: flex;
   height: calc(100vh - 80px); /* Adjusting height to fit the screen minus header height */

@@ -75,9 +75,10 @@ function handleInput() {
     const divC1Text = 'Gaskets Made: ' + divC1Numbers.gasketsMadeTotal + '<br>Gaskets Remakes: ' + divC1Numbers.gasketsRemadeTotal + '<br>Remake Percentage: ' + (divC1Numbers.remakePercent).toFixed(2) + '%' + '<br>Remake Shipping Charges: ' + divC1Numbers.shipCost
     divC1.innerHTML = divC1Text;
     //console.log(startInput.value);
+    const userMode = document.getElementById('user-mode').value;
     const tableC2 = $('#tableC2').DataTable();
     tableC2.clear();
-    tableC2.rows.add(summarizeDataUser(startDate,endDate, lines, users));
+    tableC2.rows.add(summarizeDataUser(startDate,endDate, lines, users, userMode));
     tableC2.draw();
     const tableC3 = $('#tableC3').DataTable();
     tableC3.clear();
@@ -99,9 +100,37 @@ let columns = [
       title: "Remake Qty",
     }];
 
-createTable("#tableA2",columns,summarizeDataUser(firstDayOfYear, lastDayOfYear, lines, users));
-createTable("#tableB2",columns,summarizeDataUser(firstDayOfPreviousMonth, lastDayOfPreviousMonth, lines, users));
-createTable("#tableC2",columns,summarizeDataUser(startInput.value,endInput.value, lines, users));
+// Function to update all tables based on current mode
+const updateTables = () => {
+  const userMode = document.getElementById('user-mode').value;
+  
+  // Destroy existing DataTables if they exist
+  if ($.fn.DataTable.isDataTable('#tableA2')) {
+    $('#tableA2').DataTable().destroy();
+  }
+  if ($.fn.DataTable.isDataTable('#tableB2')) {
+    $('#tableB2').DataTable().destroy();
+  }
+  if ($.fn.DataTable.isDataTable('#tableC2')) {
+    $('#tableC2').DataTable().destroy();
+  }
+  
+  // Clear the table HTML
+  $('#tableA2').empty();
+  $('#tableB2').empty();
+  $('#tableC2').empty();
+  
+  // Recreate the tables
+  createTable("#tableA2",columns,summarizeDataUser(firstDayOfYear, lastDayOfYear, lines, users, userMode));
+  createTable("#tableB2",columns,summarizeDataUser(firstDayOfPreviousMonth, lastDayOfPreviousMonth, lines, users, userMode));
+  createTable("#tableC2",columns,summarizeDataUser(startInput.value,endInput.value, lines, users, userMode));
+};
+
+// Initial table creation
+updateTables();
+
+// Add event listener for mode toggle
+document.getElementById('user-mode').addEventListener('change', updateTables);
 
 columns = [
     {
