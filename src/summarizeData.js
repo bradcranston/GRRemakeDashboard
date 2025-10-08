@@ -58,20 +58,18 @@ function summarizeDataUser(start, end, lines, users) {
 
 
 
-  // Map __kp_User to user names and filter based on Account_Type
+  // Map __kp_User to user names
   // MPKey from lines data will match to __kp_User from user data
   const userMap = users.reduce((map, user) => {
-    const { __kp_User, Name_First, Name_Last, Account_Type } = user.fieldData;
-    if (Account_Type !== "Field Operations" && Account_Type !== "Territory Manager") {
-      map[__kp_User] = `${Name_First} ${Name_Last}`;
-    }
+    const { __kp_User, Name_First, Name_Last } = user.fieldData;
+    map[__kp_User] = `${Name_First} ${Name_Last}`;
     return map;
   }, {});
 
   // Prepare the result array
   const result = Object.keys(userStats).map((userKey) => {
     const stats = userStats[userKey];
-    const name = userMap[userKey] || "Unknown User";
+    const name = userMap[userKey] || userKey;
     const { totalQty, remakeQty } = stats;
     const percentage = totalQty === 0 ? 0 : remakeQty / totalQty;
 
